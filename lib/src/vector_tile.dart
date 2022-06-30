@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'generated/vector_tile.pb.dart' as raw;
@@ -43,14 +44,12 @@ Layer _decodeLayer(raw.Layer layer) {
     );
   }).toList();
   List<Feature> features = layer.features.map((feature) {
-    final type = _convertGeomType(feature.type);
-    final geometry =
-        _decodeGeometry(feature.geometry, type, layer.extent.toDouble());
+    final geometry = _decodeGeometry(feature.geometry, feature.type);
     final properties = _decodeProperties(layer.keys, values, feature.tags);
 
     return Feature(
       id: feature.id.toInt(),
-      geometry: geometry!,
+      geometries: geometry,
       properties: properties,
     );
   }).toList();
@@ -59,107 +58,56 @@ Layer _decodeLayer(raw.Layer layer) {
     name: layer.name,
     extent: layer.extent,
     version: layer.version,
-    keys: layer.keys.toList(),
-    values: values,
+    // keys: layer.keys.toList(),
+    // values: values,
     features: features,
   );
 }
 
-GeometryType _convertGeomType(raw.GeomType rawGeomType) {
-  switch (rawGeomType) {
-    case raw.GeomType.POINT:
-      return GeometryType.point;
-    case raw.GeomType.LINESTRING:
-      return GeometryType.lineString;
-    case raw.GeomType.POLYGON:
-      return GeometryType.polygon;
-    default:
-      return GeometryType.unknown;
-  }
+Point<int> _toPoint(List<int> x) {
+  assert(x.length == 2);
+  return Point<int>(x[0], x[1]);
 }
 
-Geometry? _decodeGeometry(
+List<Geometry> _decodeGeometry(
   List<int> geometries,
-  GeometryType type,
-  double extent,
+  raw.GeomType type,
 ) {
   switch (type) {
-    case GeometryType.point:
-      List<List<int>> coords = _decodePoint(geometries);
+    case raw.GeomType.POINT:
+      final coords = _decodePoint(geometries);
 
-      if (coords.length == 1) {
-        return Geometry.point(
-          coordinates: coords[0].map((intVal) => intVal / extent).toList(),
-        );
-      }
+      return coords
+          .map((point) => PointGeometry(coordinates: _toPoint(point)))
+          .toList();
 
-      return Geometry.multiPoint(
-        coordinates:
-            coords.map((coord) => coord.map((intVal) => intVal / extent))
-                as List<List<double>>,
-      );
+    case raw.GeomType.LINESTRING:
+      final coords = _decodeLineString(geometries);
 
-    case GeometryType.lineString:
-      List<List<List<int>>> coords = _decodeLineString(geometries);
+      return coords
+          .map(
+            (line) =>
+                LineStringGeometry(coordinates: line.map(_toPoint).toList()),
+          )
+          .toList();
 
-      if (coords.length == 1) {
-        return Geometry.lineString(
-          coordinates: coords[0]
-              .map(
-                (point) => point.map((intVal) => intVal / extent).toList(),
-              )
-              .toList(),
-        );
-      }
+    case raw.GeomType.POLYGON:
+      final coords = _decodePolygon(geometries);
 
-      return Geometry.multiLineString(
-        coordinates: coords
-            .map(
-              (line) => line
+      return coords
+          .map(
+            (polygon) => PolygonGeometry(
+              coordinates: polygon
                   .map(
-                    (point) => point.map((intVal) => intVal / extent).toList(),
+                    (ring) => ring.map(_toPoint).toList(),
                   )
                   .toList(),
-            )
-            .toList(),
-      );
+            ),
+          )
+          .toList();
 
-    case GeometryType.polygon:
-      List<List<List<List<int>>>> coords = _decodePolygon(geometries);
-
-      if (coords.length == 1) {
-        return Geometry.polygon(
-          coordinates: coords[0]
-              .map(
-                (ring) => ring
-                    .map(
-                      (point) =>
-                          point.map((intVal) => intVal / extent).toList(),
-                    )
-                    .toList(),
-              )
-              .toList(),
-        );
-      }
-
-      return Geometry.multiPolygon(
-        coordinates: coords
-            .map(
-              (polygon) => polygon
-                  .map(
-                    (ring) => ring
-                        .map(
-                          (point) =>
-                              point.map((intVal) => intVal / extent).toList(),
-                        )
-                        .toList(),
-                  )
-                  .toList(),
-            )
-            .toList(),
-      );
     default:
-      return null;
+      return [];
   }
 }
 

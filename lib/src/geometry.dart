@@ -1,70 +1,38 @@
-enum GeometryType {
-  point,
-  lineString,
-  polygon,
-  multiPoint,
-  multiLineString,
-  multiPolygon,
-  unknown,
-}
+import 'dart:math';
 
 abstract class Geometry {
-  factory Geometry.point({required List<double> coordinates}) = PointGeometry;
-  factory Geometry.multiPoint({required List<List<double>> coordinates}) =
-      MultiPointGeometry;
-  factory Geometry.lineString({required List<List<double>> coordinates}) =
+  factory Geometry.point({required Point<int> coordinates}) = PointGeometry;
+  factory Geometry.lineString({required List<Point<int>> coordinates}) =
       LineStringGeometry;
-  factory Geometry.multiLineString({
-    required List<List<List<double>>> coordinates,
-  }) = MultiLineStringGeometry;
-  factory Geometry.polygon({required List<List<List<double>>> coordinates}) =
+  factory Geometry.polygon({required List<List<Point<int>>> coordinates}) =
       PolygonGeometry;
-  factory Geometry.multiPolygon({
-    required List<List<List<List<double>>>> coordinates,
-  }) = MultiPolygonGeometry;
 
-  Geometry._();
+  const Geometry._();
 }
 
 /// Point Geometry.
 class PointGeometry extends Geometry {
-  PointGeometry({
+  const PointGeometry({
     required this.coordinates,
   }) : super._();
-  List<double> coordinates;
+
+  final Point<int> coordinates;
 }
 
-class MultiPointGeometry extends Geometry {
-  MultiPointGeometry({
-    required this.coordinates,
-  }) : super._();
-  List<List<double>> coordinates;
-}
-
+/// LineString Geometry.
 class LineStringGeometry extends Geometry {
-  LineStringGeometry({
+  const LineStringGeometry({
     required this.coordinates,
   }) : super._();
-  List<List<double>> coordinates;
+
+  final List<Point<int>> coordinates;
 }
 
-class MultiLineStringGeometry extends Geometry {
-  MultiLineStringGeometry({
-    required this.coordinates,
-  }) : super._();
-  List<List<List<double>>> coordinates;
-}
-
+/// Polygon Geometry.
 class PolygonGeometry extends Geometry {
-  PolygonGeometry({
+  const PolygonGeometry({
     required this.coordinates,
   }) : super._();
-  List<List<List<double>>> coordinates;
-}
 
-class MultiPolygonGeometry extends Geometry {
-  MultiPolygonGeometry({
-    required this.coordinates,
-  }) : super._();
-  List<List<List<List<double>>>>? coordinates;
+  final List<List<Point<int>>> coordinates;
 }

@@ -4,11 +4,11 @@ import 'value.dart';
 class Feature {
   const Feature({
     required this.id,
-    required this.geometry,
+    required this.geometries,
     required this.properties,
   });
 
   final int id;
-  final Geometry geometry;
+  final List<Geometry> geometries;
   final Map<String, Value> properties;
 }
