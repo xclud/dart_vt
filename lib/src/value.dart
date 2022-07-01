@@ -1,5 +1,7 @@
 import 'package:fixnum/fixnum.dart';
 
+/// Variant type encoding. Exactly one of these values must be present in a valid message.
+/// The use of values is described in section 4.1 of the specification.
 class Value {
   const Value({
     this.stringValue,

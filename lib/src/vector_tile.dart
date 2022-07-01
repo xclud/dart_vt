@@ -78,7 +78,7 @@ List<Geometry> _decodeGeometry(
       final coords = _decodePoint(geometries);
 
       return coords
-          .map((point) => PointGeometry(coordinates: _toPoint(point)))
+          .map((point) => Geometry.point(coordinates: _toPoint(point)))
           .toList();
 
     case raw.GeomType.LINESTRING:
@@ -87,7 +87,7 @@ List<Geometry> _decodeGeometry(
       return coords
           .map(
             (line) =>
-                LineStringGeometry(coordinates: line.map(_toPoint).toList()),
+                Geometry.lineString(coordinates: line.map(_toPoint).toList()),
           )
           .toList();
 
@@ -96,7 +96,7 @@ List<Geometry> _decodeGeometry(
 
       return coords
           .map(
-            (polygon) => PolygonGeometry(
+            (polygon) => Geometry.polygon(
               coordinates: polygon
                   .map(
                     (ring) => ring.map(_toPoint).toList(),
