@@ -1,4 +1,4 @@
-/// Vector Tiles for Dart. Provides `.pbf` parser and needed classes.
+/// Vector Tiles for Dart. Provides `.pbf` and `.mvt` parser and needed classes.
 library vt;
 
 export 'src/feature.dart';

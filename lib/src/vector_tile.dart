@@ -16,18 +16,20 @@ export 'value.dart';
 const int _lineTo = 2;
 const int _closePath = 7;
 
+/// Vector tile containing multiple layers.
 class VectorTile {
   const VectorTile({
     required this.layers,
   });
 
-  /// decodes the given bytes (`.mvt`/`.pbf`) to a [VectorTile]
+  /// Decodes the given bytes (`.mvt`/`.pbf`) to a [VectorTile]
   factory VectorTile.fromBytes({required Uint8List bytes}) {
     final tile = raw.VectorTile.fromBuffer(bytes);
     List<Layer> layers = tile.layers.map(_decodeLayer).toList();
     return VectorTile(layers: layers);
   }
 
+  /// Layers of this VectorTile.
   final List<Layer> layers;
 }
 
